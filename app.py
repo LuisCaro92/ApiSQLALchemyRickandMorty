@@ -1,4 +1,4 @@
-from flask import Flask,request, jsonify
+from flask import Flask,request, jsonify, json
 from models import db, User, Character, Location, Favorito
 
 app = Flask(__name__)
@@ -21,14 +21,7 @@ def create_user():
 
     return "Usuario guardado"
 
-@app.route("/character/<int:id>", methods=["GET"])
-def get_oneuser(id):
-    user = User.query.get(id)
-    if user is not None:
-       return jsonify(user.serialize())
 
-    else:
-        return jsonify("No encontrado"), 418   
     
     
 @app.route("/users/list", methods=["GET"])
@@ -38,6 +31,37 @@ def get_users():
     for user in users:
         result.append(user.serialize())
     return jsonify(result)
+
+
+@app.route("/users/favorito/<int:id>", methods=[ "GET"])
+def get_oneuser(id):
+    user = User.query.get(id)
+    if user is not None:
+       return jsonify(user.serialize())
+
+    else:
+        return jsonify("No encontrado"), 418 
+    
+
+#@app.route("/favorito/planet/<int:id>", methods=["POST"])
+#def add_oneplanet(id):
+    user = User.query.get(id)
+    favorito = Favorito.query.filter_by(user=user.username).first()
+    location = Location.query.filter_by(favorito=favorito.location).first()
+    print(location)
+    if user is not None:
+       location.name = request.json.get("name")
+       db.session.add(location)
+       db.session.commit()
+
+       return jsonify("Modificado")
+
+    else:
+        return jsonify("No encontrado"), 418     
+   
+
+
+
 
 @app.route("/users/<int:id>", methods=["PUT", "DELETE"])
 def update_user(id):
@@ -193,6 +217,7 @@ def add_favorite():
     db.session.commit()
 
     return "Favorito guardado"
+
 
 @app.route("/favorito/<int:id>", methods=["GET"])
 def get_onefavorito(id):

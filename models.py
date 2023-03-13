@@ -8,13 +8,14 @@ class User(db.Model):
     username = db.Column(db.String(50), nullable=False)
     password = db.Column(db.String(20), nullable=False)
     age = db.Column(db.Integer)
-    favorito = db.relationship("Favorito")
+    favorito = db.relationship("Favorito", backref= "users")
 
     def serialize(self):
         return {
             "username": self.username,
             "id": self.id,
-            "age": self.age
+            "age": self.age,
+            "favorito":self.favorito
         }
     
 class Character(db.Model):
@@ -43,13 +44,14 @@ class Location(db.Model):
     name = db.Column(db.String(200), nullable=False)
     dimension = db.Column(db.String(200), nullable=False)
     favorito = db.relationship("Favorito")
+
  
     
     def serialize(self):
         return{
             "name": self.name,
             "dimension": self.dimension,
-            "residents": self.residents
+           
         }
         
 
@@ -65,6 +67,6 @@ class Favorito(db.Model):
         return{
             "user": self.user,
             "character": self.character,
-            "location": self.location
+            "location": [location.serialize() for location in self.location]
         }
 
